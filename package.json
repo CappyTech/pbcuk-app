@@ -1,0 +1,14 @@
+{
+  "name": "pbcuk-app",
+  "private": true,
+  "version": "0.1.0",
+  "scripts": {
+    "tailwind:build": "npx tailwindcss -i ./static/src/tailwind.css -o ./static/dist/tailwind.css --minify",
+    "tailwind:watch": "npx tailwindcss -i ./static/src/tailwind.css -o ./static/dist/tailwind.css --watch"
+  },
+  "devDependencies": {
+    "tailwindcss": "^3.4.0",
+    "postcss": "^8.4.0",
+    "autoprefixer": "^10.4.0"
+  }
+}

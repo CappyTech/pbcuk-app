@@ -1,0 +1,20 @@
+:root{ --pcu-accent:#0b5fff; --pcu-text:#0b1324; --pcu-muted:#6b7280; --pcu-bg:#ffffff; --pcu-border:#e5e7eb; }
+*{ box-sizing:border-box; }
+html,body{ margin:0; padding:0; background:var(--pcu-bg); color:var(--pcu-text); font:16px/1.5 system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, Noto Sans, Arial, "Apple Color Emoji","Segoe UI Emoji"; }
+.container{ max-width:960px; margin:0 auto; padding:1rem; }
+.site-header{ border-bottom:1px solid var(--pcu-border); }
+.site-header .brand{ text-decoration:none; color:var(--pcu-text); font-weight:700; }
+h1{ font-size:1.5rem; margin:1rem 0; }
+.table, table{ width:100%; border-collapse:collapse; }
+th, td{ border-bottom:1px solid var(--pcu-border); padding:.5rem .25rem; }
+small{ color:var(--pcu-muted); }
+.button{ display:inline-block; padding:.5rem .75rem; border-radius:.375rem; text-decoration:none; border:1px solid transparent; cursor:pointer; }
+.button.primary{ background:var(--pcu-accent); color:#fff; }
+.button.primary:hover{ filter:brightness(0.95); }
+.button[aria-disabled="true"]{ opacity:.5; pointer-events:none; cursor:not-allowed; }
+.site-footer{ border-top:1px solid var(--pcu-border); margin-top:2rem; padding:1rem 0; color:var(--pcu-muted); }
+
+/* Badges */
+.badge{ display:inline-flex; align-items:center; gap:.35rem; padding:.15rem .5rem; border-radius:999px; font-size:.8125rem; border:1px solid var(--pcu-border); }
+.badge.reserved{ background:#fff7ed; border-color:#fdba74; color:#9a3412; }
+.badge .countdown{ font-variant-numeric: tabular-nums; font-weight:600; }

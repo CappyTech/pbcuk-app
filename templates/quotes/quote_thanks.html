@@ -1,0 +1,15 @@
+{% extends "base_public.html" %}
+{% block title %}Quote Accepted{% endblock %}
+{% block content %}
+  <h1 class="text-2xl font-semibold mb-4">Thank you</h1>
+  <p>Your acceptance for quote <strong>{{ quote.reference }}</strong> has been recorded.</p>
+  {% if invoice %}
+    <p class="mt-2">Invoice <strong>{{ invoice.number }}</strong> has been generated for a total of £{{ invoice.total }}.</p>
+    {% if request.user.is_authenticated %}
+      <p class="mt-3 text-sm">View your invoice: <a href="{% url 'accounts:invoice_detail' invoice.number %}" class="text-blue-600 underline">Invoice Detail</a> · <a href="{% url 'quotes:invoice_pdf' invoice.number %}" class="text-blue-600 underline" target="_blank" rel="noopener">PDF</a></p>
+    {% endif %}
+  {% else %}
+    <p class="mt-2">An invoice will be generated shortly.</p>
+  {% endif %}
+  <p class="mt-4">We will be in touch shortly with next steps.</p>
+{% endblock %}

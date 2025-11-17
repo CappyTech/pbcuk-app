@@ -1,0 +1,73 @@
+{% extends "base_public.html" %}
+{% block title %}Quotes{% endblock %}
+{% block content %}
+  <h1 class="text-2xl font-semibold mb-6">Quotes</h1>
+
+  <h2 class="text-xl font-medium mt-8 mb-2">Your reserved quotes</h2>
+  {% if reserved_my %}
+    <ul class="space-y-2">
+      {% for q in reserved_my %}
+        <li class="flex items-center gap-3">
+          <a href="{% url 'quotes:public_quote_detail' q.token %}" class="text-slate-800 hover:underline font-medium">{{ q.reference }} — {{ q.title }}</a>
+          <span class="badge reserved">Reserved · <span class="countdown" data-expires="{{ q.reservation_expires_at|date:'c' }}" data-refresh-when-expired="true"></span></span>
+        </li>
+      {% endfor %}
+    </ul>
+  {% else %}
+    <p class="text-slate-500">You have no active reservations.</p>
+  {% endif %}
+
+  <h2 class="text-xl font-medium mt-8 mb-2">Private quotes visited</h2>
+  {% if visited_private %}
+    <ul class="space-y-2">
+      {% for q in visited_private %}
+        <li class="flex items-center gap-2">
+          <a href="{% url 'quotes:public_quote_detail' q.token %}" class="text-slate-800 hover:underline">{{ q.reference }} — {{ q.title }}</a>
+          <span class="text-xs text-slate-500">(private)</span>
+          {% if q.is_reservation_active %}
+            <span class="badge reserved">Reserved · <span class="countdown" data-expires="{{ q.reservation_expires_at|date:'c' }}"></span></span>
+          {% endif %}
+        </li>
+      {% endfor %}
+    </ul>
+  {% else %}
+    <p class="text-slate-500">No private quotes visited yet.</p>
+  {% endif %}
+
+  <h2 class="text-xl font-medium mt-8 mb-2">Public quotes visited</h2>
+  {% if visited_public %}
+    <ul class="space-y-2">
+      {% for q in visited_public %}
+        <li class="flex flex-wrap items-center gap-2">
+          <a href="{% url 'quotes:public_quote_detail' q.token %}" class="text-slate-800 hover:underline">{{ q.reference }} — {{ q.title }}</a>
+          <span class="text-xs text-slate-500">(public){% if q.valid_until %} · valid until {{ q.valid_until }}{% endif %}</span>
+          {% if q.is_reservation_active %}
+            <span class="badge reserved">Reserved · <span class="countdown" data-expires="{{ q.reservation_expires_at|date:'c' }}"></span></span>
+          {% endif %}
+        </li>
+      {% endfor %}
+    </ul>
+  {% else %}
+    <p class="text-slate-500">No public quotes visited yet.</p>
+  {% endif %}
+
+  <h2 class="text-xl font-medium mt-8 mb-4 flex items-center gap-3">Browse public quotes
+    <span class="badge">Available: {{ public_available_count }}</span>
+    <span class="badge reserved">Reserved: {{ public_reserved_count }}</span>
+  </h2>
+  {% if quotes %}
+    <ul class="divide-y divide-slate-200 border border-slate-200 rounded-md">
+      {% for q in quotes %}
+        <li class="p-3 flex flex-wrap items-center gap-2">
+          <a href="{% url 'quotes:public_quote_detail' q.token %}" class="font-medium text-slate-800 hover:underline">{{ q.reference }} — {{ q.title }}</a>
+          {% if q.valid_until %}<span class="text-xs text-slate-500">(valid until {{ q.valid_until }})</span>{% endif %}
+          {% if q.is_reservation_active %}
+            <span class="badge reserved">Reserved · <span class="countdown" data-expires="{{ q.reservation_expires_at|date:'c' }}"></span></span>
+          {% endif %}
+        </li>
+      {% endfor %}
+    </ul>
+  {% else %}
+    <p class="text-slate-500">There are no public quotes at this time.</p>
+  {% endif %}
+{% endblock %}

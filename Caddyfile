@@ -1,0 +1,25 @@
+{$CADDY_DOMAIN} {
+  encode zstd gzip
+
+  @static path /static/*
+  handle @static {
+    root * /srv/static
+    file_server
+    header {
+      Cache-Control "public, max-age=31536000, immutable"
+    }
+  }
+
+  handle {
+    reverse_proxy web:8000
+  }
+
+  header {
+    Strict-Transport-Security "max-age=31536000; includeSubDomains; preload"
+    X-Frame-Options "DENY"
+    X-Content-Type-Options "nosniff"
+    Referrer-Policy "same-origin"
+  }
+
+  tls {$CADDY_EMAIL}
+}

@@ -1,0 +1,9 @@
+:root{
+	--admin-accent:#0b5fff;
+}
+
+/* Admin badges (changelist) */
+.admin-badge{ display:inline-flex; align-items:center; gap:.35rem; padding:.15rem .5rem; border-radius:999px; font-size:.75rem; border:1px solid rgba(255,255,255,.15); }
+.admin-badge.reserved{ background:rgba(253,186,116,.15); border-color:#fdba74; color:#fff; }
+.admin-badge .countdown{ font-variant-numeric: tabular-nums; font-weight:600; }
+

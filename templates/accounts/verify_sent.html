@@ -1,0 +1,11 @@
+{% extends 'base_public.html' %}
+{% block title %}Verify Email{% endblock %}
+{% block content %}
+<div class="card max-w-xl">
+<h1 class="text-xl font-semibold mb-4">Verify Your Email</h1>
+<p class="text-sm text-slate-600 mb-4">A verification link has been sent to your email. Please click it to activate your account.</p>
+{% if next %}<p class="text-xs text-slate-500 mb-2">You will be redirected to your requested page after login.</p>{% endif %}
+<p class="text-sm mb-2">Didn't receive it? (This demo uses console backend; check server logs.)</p>
+<p class="text-sm"><a href="{% url 'accounts:resend_verification' %}" class="underline">Resend verification email</a></p>
+</div>
+{% endblock %}

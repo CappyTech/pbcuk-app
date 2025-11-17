@@ -1,0 +1,59 @@
+{% extends "base_public.html" %}
+{% block title %}Quote {{ quote.reference }}{% endblock %}
+{% block content %}
+  <h1 class="text-2xl font-semibold mb-4">Quotation: {{ quote.reference }} – {{ quote.title }}</h1>
+  {% if is_expired %}
+    <p class="text-red-600 font-medium">This quote has expired.</p>
+  {% endif %}
+  <p class="text-sm text-slate-600 mb-4">Status: <span class="font-medium text-slate-800">{{ quote.get_status_display }}</span></p>
+  {% if quote.notes %}<div class="prose prose-sm mb-6">{{ quote.notes|linebreaks }}</div>{% endif %}
+
+  <table class="w-full border-collapse text-sm mb-6">
+    <thead>
+      <tr class="border-b border-slate-200 text-left">
+        <th class="py-2 pr-2 font-semibold">Description</th>
+        <th class="py-2 px-2 font-semibold text-right">Qty</th>
+        <th class="py-2 px-2 font-semibold text-right">Unit Price</th>
+        <th class="py-2 pl-2 font-semibold text-right">Line Total</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for item in items %}
+      <tr class="border-b border-slate-100">
+        <td class="py-2 pr-2 align-top">{{ item.description }}</td>
+        <td class="py-2 px-2 text-right">{{ item.quantity }}</td>
+        <td class="py-2 px-2 text-right">£{{ item.unit_price }}</td>
+        <td class="py-2 pl-2 text-right font-medium">£{{ item.total }}</td>
+      </tr>
+      {% empty %}
+      <tr><td colspan="4" class="py-4 text-center text-slate-500">No items</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+
+  <div class="text-right space-y-1 text-sm">
+    <p>Subtotal: <span class="font-semibold">£{{ quote.subtotal }}</span></p>
+    <p><span class="delivery-label" title="The £20 delivery fee includes:&#10;• Heavy-duty protective packaging&#10;• Internal foam bracing to protect components&#10;• Full tracking and signature&#10;• Front-door courier service&#10;• Insurance for loss or damage&#10;• Specialist handling of fragile PC systems">Secure Insured Delivery: <span class="font-semibold">£{{ quote.delivery_price }}</span></span></p>
+    <p>
+      {% if quote.not_vat_registered %}
+        <span class="text-xs text-slate-500">(Not VAT registered — <a class="underline" href="https://www.gov.uk/vat-registration/when-to-register" target="_blank" rel="noopener">VAT registration thresholds</a>)</span>
+      {% endif %}
+      VAT: <span class="font-semibold">£{{ quote.vat_amount }}</span>
+    </p>
+    <p class="text-base">Total: <span class="font-bold">£{{ quote.grand_total }}</span></p>
+  </div>
+
+  {% if reservation_active %}
+    <p class="mt-4"><span class="badge reserved">Reserved · <span class="countdown" data-expires="{{ reservation_expires_at|date:'c' }}" data-refresh-when-expired="true"></span></span></p>
+  {% endif %}
+
+  {% if not is_expired and quote.status != 'accepted' %}
+    {% if reservation_active and not reservation_owned_by_me %}
+      <p class="mt-6"><a class="inline-block px-4 py-2 rounded bg-slate-300 text-slate-600 cursor-not-allowed" aria-disabled="true" tabindex="-1" role="button" title="This quote is reserved and cannot be accepted right now">Accept this quote</a></p>
+    {% elif reservation_owned_by_me %}
+      <p class="mt-6"><a class="inline-block px-5 py-2.5 rounded bg-blue-600 text-white font-medium hover:bg-blue-500" href="{% url 'quotes:public_quote_accept' quote.token %}">Continue accepting this quote</a></p>
+    {% else %}
+      <p class="mt-6"><a class="inline-block px-5 py-2.5 rounded bg-blue-600 text-white font-medium hover:bg-blue-500" href="{% url 'quotes:public_quote_accept' quote.token %}">Accept this quote</a></p>
+    {% endif %}
+  {% endif %}
+{% endblock %}

@@ -1,0 +1,11 @@
+﻿asgiref==3.10.0
+Django==5.2.8
+django-jazzmin==3.0.1
+setuptools==80.9.0
+sqlparse==0.5.3
+tzdata==2025.2
+wheel==0.45.1
+psycopg[binary]==3.2.12
+gunicorn==22.0.0
+stripe==13.1.0
+whitenoise==6.6.0

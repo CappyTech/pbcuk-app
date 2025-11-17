@@ -1,0 +1,123 @@
+{% extends 'base_public.html' %}
+{% block title %}Payment Methods — Invoice {{ invoice.number }}{% endblock %}
+{% block content %}
+<div class="card max-w-2xl">
+  <h1 class="text-xl font-semibold mb-4">Payment Methods</h1>
+  <p class="text-sm text-slate-600 mb-2">Invoice <span class="font-medium">{{ invoice.number }}</span></p>
+  <p class="text-xs text-slate-500 mb-4">Total: £{{ invoice_total }} · Paid: £{{ already_paid }} · Outstanding: <span class="font-medium">£{{ outstanding }}</span></p>
+
+  <div class="mb-6">
+    <h2 class="text-sm font-semibold text-slate-700 mb-2">Pay by Card (Stripe)</h2>
+    {% if stripe_available and outstanding > 0 %}
+      {% if stripe_fee|floatformat:2 != '0.00' %}
+        <p class="text-sm text-slate-600">A card processing fee applies when paying by card.</p>
+        <ul class="text-sm mt-2 space-y-1">
+          <li><span class="text-slate-500">Outstanding amount:</span> £{{ outstanding }}</li>
+          <li><span class="text-slate-500">Card processing fee:</span> £{{ stripe_fee }}</li>
+          <li class="font-semibold"><span class="text-slate-600">Total card charge:</span> £{{ card_total }}</li>
+        </ul>
+        <div class="mt-3">
+          <a href="{% url 'accounts:invoice_pay' invoice.number %}" class="inline-flex items-center px-5 py-2.5 rounded-md bg-emerald-600 text-white text-sm font-semibold hover:bg-emerald-500">Pay by card</a>
+        </div>
+      {% else %}
+        <p class="text-sm text-slate-600">Pay securely by card.</p>
+        <ul class="text-sm mt-2 space-y-1">
+          <li><span class="text-slate-500">Outstanding amount:</span> £{{ outstanding }}</li>
+        </ul>
+        <div class="mt-3">
+          <a href="{% url 'accounts:invoice_pay' invoice.number %}" class="inline-flex items-center px-5 py-2.5 rounded-md bg-emerald-600 text-white text-sm font-semibold hover:bg-emerald-500">Pay by card</a>
+        </div>
+      {% endif %}
+    {% else %}
+      <p class="text-sm text-slate-600">Card payments are currently unavailable.</p>
+    {% endif %}
+  </div>
+
+  <div class="mb-6">
+    <h2 class="text-sm font-semibold text-slate-700 mb-2">Bank Transfer</h2>
+    <p class="text-sm text-slate-600">Please use the invoice number as the payment reference.</p>
+    {% if stripe_available and outstanding > 0 and stripe_fee|floatformat:2 != '0.00' %}
+      <p class="mt-1 text-sm text-emerald-700">Save £{{ stripe_fee }} by bank transfer.</p>
+    {% endif %}
+    <dl class="mt-2 space-y-2 text-sm">
+      {% if bank.bank_name %}<div class="flex items-start justify-between gap-2"><dt class="text-slate-500">Bank</dt><dd class="flex items-center gap-2"><span class="font-medium">{{ bank.bank_name }} <button type="button" data-copy="{{ bank.bank_name }}" class="copy-btn px-2 py-1 text-xs rounded bg-slate-200 hover:bg-slate-300" aria-label="Copy payment reference">Copy</button></dd></div>{% endif %}
+      {% if bank.account_name %}<div class="flex items-start justify-between gap-2"><dt class="text-slate-500">Account Name</dt><dd class="flex items-center gap-2"><span class="font-medium">{{ bank.account_name }} <button type="button" data-copy="{{ bank.account_name }}" class="copy-btn px-2 py-1 text-xs rounded bg-slate-200 hover:bg-slate-300" aria-label="Copy payment reference">Copy</button></dd></div>{% endif %}
+      {% if bank.account_number %}<div class="flex items-start justify-between gap-2"><dt class="text-slate-500">Account Number</dt><dd class="flex items-center gap-2"><span class="font-medium">{{ bank.account_number }}</span><button type="button" data-copy="{{ bank.account_number }}" class="copy-btn px-2 py-1 text-xs rounded bg-slate-200 hover:bg-slate-300" aria-label="Copy account number">Copy</button></dd></div>{% endif %}
+      {% if bank.sort_code %}<div class="flex items-start justify-between gap-2"><dt class="text-slate-500">Sort Code</dt><dd class="flex items-center gap-2"><span class="font-medium">{{ bank.sort_code }}</span><button type="button" data-copy="{{ bank.sort_code }}" class="copy-btn px-2 py-1 text-xs rounded bg-slate-200 hover:bg-slate-300" aria-label="Copy sort code">Copy</button></dd></div>{% endif %}
+      <div class="flex items-start justify-between gap-2"><dt class="text-slate-500">Amount Due</dt><dd class="flex items-center gap-2"><span class="font-medium">£{{ outstanding }} </span><button type="button" data-copy="{{ outstanding }}" class="copy-btn px-2 py-1 text-xs rounded bg-slate-200 hover:bg-slate-300" aria-label="Copy payment reference">Copy</button></dd></div>
+      <div class="flex items-start justify-between gap-2"><dt class="text-slate-500">Payment Reference</dt><dd class="flex items-center gap-2"><span class="font-medium">{{ invoice.number }}</span><button type="button" data-copy="{{ invoice.number }}" class="copy-btn px-2 py-1 text-xs rounded bg-slate-200 hover:bg-slate-300" aria-label="Copy payment reference">Copy</button></dd></div>
+    </dl>
+    <p class="mt-2 text-xs text-slate-500">Funds usually clear within 1 business day. You’ll receive an email once recorded.</p>
+  </div>
+
+  {% if payments %}
+  <div class="mb-6">
+    <h2 class="text-sm font-semibold text-slate-700 mb-2">Payments Breakdown</h2>
+    <div class="overflow-x-auto">
+      <table class="min-w-full text-xs">
+        <thead class="border-b">
+          <tr class="text-slate-600">
+            <th class="py-1 pr-3 text-left">Date</th>
+            <th class="py-1 pr-3 text-left">Method</th>
+            <th class="py-1 pr-3 text-left">Provider</th>
+            <th class="py-1 pr-3 text-left">Status</th>
+            <th class="py-1 pr-3 text-right">Amount</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y">
+          {% for p in payments %}
+          <tr class="{% if p.status == 'completed' %}bg-emerald-50{% elif p.status == 'failed' %}bg-red-50{% endif %}">
+            <td class="py-1 pr-3">{{ p.created_at|date:'Y-m-d H:i' }}</td>
+            <td class="py-1 pr-3">{{ p.method }}</td>
+            <td class="py-1 pr-3">{{ p.provider }}</td>
+            <td class="py-1 pr-3">{{ p.get_status_display }}</td>
+            <td class="py-1 pr-3 text-right">£{{ p.amount }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+  {% endif %}
+
+  <div class="flex gap-3">
+    <a href="{% url 'accounts:invoice_detail' invoice.number %}" class="inline-flex items-center px-5 py-2.5 rounded-md bg-slate-200 text-slate-800 text-sm font-medium hover:bg-slate-300">Back to invoice</a>
+    <a href="{% url 'quotes:invoice_pdf' invoice.number %}" class="inline-flex items-center px-5 py-2.5 rounded-md bg-blue-600 text-white text-sm font-semibold hover:bg-blue-500" target="_blank" rel="noopener">Download Invoice PDF</a>
+  </div>
+</div>
+<script>
+document.addEventListener('DOMContentLoaded', function(){
+  document.querySelectorAll('.copy-btn[data-copy]').forEach(function(btn){
+    btn.addEventListener('click', function(){
+      var val = btn.getAttribute('data-copy');
+      if(!val) return;
+      navigator.clipboard.writeText(val).then(function(){
+        var original = btn.textContent;
+        btn.textContent = 'Copied';
+        btn.classList.remove('bg-slate-200');
+        btn.classList.add('bg-emerald-600','text-white');
+        setTimeout(function(){
+          btn.textContent = original;
+          btn.classList.add('bg-slate-200');
+          btn.classList.remove('bg-emerald-600','text-white');
+        }, 1500);
+      }).catch(function(){
+        btn.textContent = 'Error';
+        setTimeout(function(){ btn.textContent = 'Copy'; }, 2000);
+      });
+    });
+  });
+  var feeBtn = document.getElementById('fee-info-btn');
+  var feeBox = document.getElementById('fee-info');
+  var feeClose = document.getElementById('fee-info-close');
+  if(feeBtn && feeBox){
+    feeBtn.addEventListener('click', function(){
+      feeBox.classList.toggle('hidden');
+    });
+  }
+  if(feeClose){
+    feeClose.addEventListener('click', function(){ feeBox.classList.add('hidden'); });
+  }
+});
+</script>
+{% endblock %}

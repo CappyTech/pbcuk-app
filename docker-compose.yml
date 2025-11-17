@@ -1,0 +1,54 @@
+
+services:
+  # -------------------------------------------------
+  # PostgreSQL – database for Django
+  # -------------------------------------------------
+  db:
+    image: postgres:15-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-django}
+      POSTGRES_USER: ${POSTGRES_USER:-django}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?POSTGRES_PASSWORD not set}
+    volumes:
+      - pg_data:/var/lib/postgresql/data
+    networks:
+      - internal
+
+  # -------------------------------------------------
+  # Django (Gunicorn) – the web application
+  # -------------------------------------------------
+  web:
+    build:
+      context: ./src                # Dockerfile lives in src/
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    env_file:
+      - .env                        # loads all the variables you defined
+    environment:
+      # Build a DATABASE_URL from the discrete vars (Django reads this)
+      DATABASE_URL: "postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db:${POSTGRES_PORT:-5432}/${POSTGRES_DB}"
+    command: >
+      gunicorn myproject.wsgi:application
+        --bind 0.0.0.0:8000
+        --workers 3
+        --log-file -
+    # Mount the source tree (read‑only) – handy for debugging / hot‑reload in dev
+    volumes:
+      - ./src:/app:ro
+      # Share static & media with the host so the external Caddy can serve them
+      - static_volume:/app/staticfiles
+      - media_volume:/app/media
+    depends_on:
+      - db
+    networks:
+      - internal
+
+networks:
+  internal:
+    driver: bridge
+
+volumes:
+  pg_data:
+  static_volume:
+  media_volume:

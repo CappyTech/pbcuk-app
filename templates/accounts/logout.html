@@ -1,0 +1,13 @@
+{% extends 'base_public.html' %}
+{% block title %}Logout{% endblock %}
+{% block content %}
+<div class="card max-w-md">
+  <h1 class="text-xl font-semibold mb-4">Logout</h1>
+  <p class="text-sm text-slate-600 mb-4">Are you sure you want to log out?</p>
+  <form method="post" class="space-y-4">
+    {% csrf_token %}
+    <button type="submit" class="inline-flex items-center px-5 py-2.5 rounded-md bg-red-600 text-white text-sm font-semibold hover:bg-red-500">Yes, log me out</button>
+    <a href="/" class="inline-flex items-center px-5 py-2.5 rounded-md bg-slate-200 text-slate-800 text-sm font-medium hover:bg-slate-300">Cancel</a>
+  </form>
+</div>
+{% endblock %}
