@@ -1,51 +1,48 @@
-
 services:
-  # -------------------------------------------------
-  # PostgreSQL – database for Django
-  # -------------------------------------------------
-  db:
-    image: postgres:15-alpine
-    restart: unless-stopped
-    environment:
-      POSTGRES_DB: ${POSTGRES_DB:-django}
-      POSTGRES_USER: ${POSTGRES_USER:-django}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?POSTGRES_PASSWORD not set}
-    volumes:
-      - pg_data:/var/lib/postgresql/data
-    networks:
-      - internal
-
-  # -------------------------------------------------
-  # Django (Gunicorn) – the web application
-  # -------------------------------------------------
+  # -----------------------------------------------------------------
+  # Django / Gunicorn
+  # -----------------------------------------------------------------
   web:
-    build:
-      context: ./src                # Dockerfile lives in src/
-      dockerfile: Dockerfile
-    restart: unless-stopped
-    env_file:
-      - .env                        # loads all the variables you defined
-    environment:
-      # Build a DATABASE_URL from the discrete vars (Django reads this)
-      DATABASE_URL: "postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db:${POSTGRES_PORT:-5432}/${POSTGRES_DB}"
+    image: ghcr.io/cappytech/pbcuk-app:sha-4c76537
     command: >
-      gunicorn myproject.wsgi:application
+      gunicorn pbcuk.wsgi:application
         --bind 0.0.0.0:8000
         --workers 3
         --log-file -
-    # Mount the source tree (read‑only) – handy for debugging / hot‑reload in dev
+    env_file:
+      - .env                          # keep secrets out of the repo
+    environment:
+      # Minimal Django settings – you can also put all of these in .env
+      DJANGO_SETTINGS_MODULE: pbcuk.settings
+      PYTHONUNBUFFERED: "1"
     volumes:
-      - ./src:/app:ro
-      # Share static & media with the host so the external Caddy can serve them
-      - static_volume:/app/staticfiles
-      - media_volume:/app/media
+      - .:/code                        # mount source code (for dev)
+      - static_volume:/code/staticfiles
+      - media_volume:/code/media
     depends_on:
       - db
     networks:
       - internal
 
+  # -----------------------------------------------------------------
+  # PostgreSQL (you can replace with MySQL or remove if you use an external DB)
+  # -----------------------------------------------------------------
+  db:
+    image: postgres:15-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: myproject
+      POSTGRES_USER: myproject_user
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-changeme}
+    volumes:
+      - pg_data:/var/lib/postgresql/data
+    networks:
+      - internal
+
 networks:
   internal:
+    driver: bridge
+  external:
     driver: bridge
 
 volumes:
