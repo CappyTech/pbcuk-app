@@ -210,7 +210,7 @@ JAZZMIN_SETTINGS = {
     "site_header": "PBC UK Admin",
     "site_brand": "PBC UK",
     "welcome_sign": "Welcome to PBC UK Admin",
-    "show_ui_builder": False,
+    "show_ui_builder": True,
 }
 JAZZMIN_UI_TWEAKS = {
     "navbar_small_text": False,
@@ -233,7 +233,7 @@ JAZZMIN_UI_TWEAKS = {
     "sidebar_nav_legacy_style": False,
     "sidebar_nav_flat_style": True,
     "theme": "spacelab",
-    "dark_mode_theme": "darkly",
+    "dark_mode_theme": None,
     "button_classes": {
         "primary": "btn-primary",
         "secondary": "btn-secondary",
